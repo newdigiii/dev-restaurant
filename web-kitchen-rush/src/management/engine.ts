@@ -78,6 +78,26 @@ export class RestaurantEngine {
     try { this.storage?.setItem(SAVE_KEY, JSON.stringify(this.state)); this.saveFailed = false; this.loadWarning = ''; return true; }
     catch { this.saveFailed = true; return false; }
   };
+  exportSave = (): string => JSON.stringify(this.state, null, 2);
+  importSave = (raw: string): string | null => {
+    try {
+      const result = restaurantSchema.safeParse(JSON.parse(raw));
+      if (!result.success) return 'Invalid save file format.';
+      const restored = result.data as RestaurantState;
+      if (layoutError(restored.furniture, width(restored))) return 'Invalid restaurant layout in save file.';
+      if (restored.dailyChallenges.some(c => c.day !== restored.day)) return 'Invalid challenge day in save file.';
+      this.rewardSavePending = false; this.pauseAfterCatchUp = null; this.catchingUp = false; this.backgrounded = false; this.awaySummary = null; this.incomeReceipts = [];
+      this.state = restored;
+      if (this.state.phase === 'report') { this.beginNextDay(); this.state.lastActiveAt = 0; }
+      if (this.state.phase === 'service' && this.state.elapsed === 0 && !this.state.dailyChallenges.length) this.startChallenges();
+      this.state.lastActiveAt = this.now();
+      this.accumulator = 0; this.savedAt = this.state.clock; this.loadWarning = '';
+      this.save(true);
+      this.event = 'Save restored. Welcome back to your rooftop.';
+      this.notify();
+      return null;
+    } catch { return 'Could not read that save file.'; }
+  };
   private recordIncome(amount: number, source: CashReceipt['source'], guestId: number | null = null, tip = 0): void {
     if (this.catchingUp) return;
     this.incomeReceipts = [...this.incomeReceipts.slice(-11), { id: ++this.incomeSequence, amount, source, guestId, tip, clock: this.state.clock }];

@@ -5,7 +5,7 @@ import { useGLTF, useProgress } from '@react-three/drei';
 import { MODELS } from '@/game/assets';
 import * as THREE from 'three';
 import { engine } from '@/game/engine';
-import { KitchenInput } from '@/game/input';
+import { activeInput, KitchenInput, setActiveInput } from '@/game/input';
 import type { GameState } from '@/game/types';
 import { Rooftop } from './Rooftop';
 import { StationView } from './Stations';
@@ -14,7 +14,7 @@ import { ActionEffects } from './ActionEffects';
 import { Diners } from './Diners';
 import { ServiceRewards } from './ServiceRewards';
 
-export let activeInput:KitchenInput|null=null;
+export { activeInput };
 Object.values(MODELS).forEach(asset=>useGLTF.preload(asset.url));
 class GraphicsBoundary extends Component<{children:ReactNode},{failed:boolean}> {
  state={failed:false};
@@ -28,7 +28,7 @@ function Sky(){
 function CameraAndSimulation({phase}:{phase:GameState['phase']}) {
  const {camera,size}=useThree();const forward=useMemo(()=>new THREE.Vector3(),[]);const right=useMemo(()=>new THREE.Vector3(),[]);
  useEffect(()=>{const cam=camera as THREE.OrthographicCamera;const menu=phase==='menu';const wide=size.width>=850;const centerX=menu&&wide?-4.4:0;cam.position.set(centerX,18,18);cam.lookAt(centerX,0,-.5);cam.zoom=Math.min(size.width/(menu&&wide?26:20.5),size.height/(menu?17.5:16));cam.updateProjectionMatrix();},[camera,size,phase]);
- useEffect(()=>{activeInput=new KitchenInput(()=>engine.state.phase==='playing'&&!engine.state.paused,()=>{if(engine.state.phase==='playing')engine.pause(!engine.state.paused);});const visibility=()=>{if(document.hidden){activeInput?.clear();engine.pause(true);}};const blur=()=>{activeInput?.clear();engine.pause(true);};document.addEventListener('visibilitychange',visibility);window.addEventListener('blur',blur);return()=>{activeInput?.dispose();activeInput=null;document.removeEventListener('visibilitychange',visibility);window.removeEventListener('blur',blur);};},[]);
+ useEffect(()=>{const input=new KitchenInput(()=>engine.state.phase==='playing'&&!engine.state.paused,()=>{if(engine.state.phase==='playing')engine.pause(!engine.state.paused);});setActiveInput(input);const visibility=()=>{if(document.hidden){activeInput?.clear();engine.pause(true);}};const blur=()=>{activeInput?.clear();engine.pause(true);};document.addEventListener('visibilitychange',visibility);window.addEventListener('blur',blur);return()=>{input.dispose();setActiveInput(null);document.removeEventListener('visibilitychange',visibility);window.removeEventListener('blur',blur);};},[]);
  useFrame((_,dt)=>{camera.getWorldDirection(forward);forward.y=0;forward.normalize();right.crossVectors(forward,camera.up).normalize();const inputs=activeInput?.read()??[];engine.update(dt,inputs,{rx:right.x,rz:right.z,fx:forward.x,fz:forward.z});},-2);
  return null;
 }

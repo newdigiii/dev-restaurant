@@ -90,4 +90,17 @@ describe('continuous local restaurant', () => {
     const recovering = e.resume(); expect(e.catchingUp).toBe(true); expect(h.read().lastActiveAt).toBeLessThan(h.now());
     e.reset(); await recovering; expect(e.state.day).toBe(1); expect(e.state.cash).toBe(1250); expect(e.catchingUp).toBe(false);
   });
+  it('exports and imports valid save JSON while rejecting corrupted or invalid layout backups', () => {
+    const h = harness(), e = new RestaurantEngine(h.storage, h.now);
+    e.rename('Sunset Bistro'); e.hire('chef');
+    const backup = e.exportSave();
+    e.reset(); expect(e.state.name).toBe('Little Rooftop');
+    expect(e.importSave('not-json')).toBe('Could not read that save file.');
+    expect(e.importSave(JSON.stringify({ invalid: true }))).toBe('Invalid save file format.');
+    expect(e.state.name).toBe('Little Rooftop');
+    expect(e.importSave(backup)).toBeNull();
+    expect(e.state.name).toBe('Sunset Bistro');
+    expect(e.state.staff.filter(s => s.role === 'chef')).toHaveLength(2);
+    expect(h.read().name).toBe('Sunset Bistro');
+  });
 });

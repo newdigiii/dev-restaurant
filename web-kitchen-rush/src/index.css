@@ -11,9 +11,9 @@
 @layer base {
   :root { --background: 42 100% 92%; --foreground: 175 27% 19%; --card: 42 100% 92%; --card-foreground: 175 27% 19%; --popover: 42 100% 92%; --popover-foreground: 175 27% 19%; --primary: 9 70% 55%; --primary-foreground: 42 100% 96%; --secondary: 173 40% 22%; --secondary-foreground: 42 100% 92%; --muted: 42 25% 80%; --muted-foreground: 150 12% 38%; --accent: 42 87% 61%; --accent-foreground: 175 27% 19%; --destructive: 9 70% 55%; --destructive-foreground: 0 0% 100%; --border: 40 30% 77%; --input: 40 30% 77%; --ring: 42 87% 61%; --radius: 1rem; }
   * { @apply border-border; }
-  html, body, #root { @apply m-0 min-h-full w-full; }
+  html, body, #root { @apply m-0 min-h-full w-full overscroll-none; }
   body { @apply bg-ink font-body text-ink antialiased; }
-  button, a, input { -webkit-tap-highlight-color: transparent; }
+  button, a, input { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
   button { @apply cursor-pointer; }
   button:disabled { @apply cursor-not-allowed; }
   button:focus-visible, a:focus-visible { @apply outline outline-4 outline-offset-4 outline-gold; }

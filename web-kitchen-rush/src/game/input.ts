@@ -26,3 +26,6 @@ export class KitchenInput {
   }
   dispose(): void { window.removeEventListener('keydown', this.down); window.removeEventListener('keyup', this.up); window.removeEventListener('blur', this.blur); this.clear(); }
 }
+export let activeInput: KitchenInput | null = null;
+export function setActiveInput(input: KitchenInput | null): void { activeInput = input; }
+

@@ -27,7 +27,7 @@ out/
 .next/
 .turbo/
 .expo
-.rork
+.vitest-attachments/
 *.apk
 *.aab
 *.ipa
@@ -48,4 +48,17 @@ out/
 .agents/logs/
 .agents/cache/
 .agents/memory/
+
+# ==========================================
+# 4. WHITELIST: CHO PHÉP COMMIT KỸ NĂNG CỦA AI (PORTABLE AGENTS)
+# ==========================================
+!.agents/
+!.agents/skills/
+!.agents/skills/**
+!.agents/workflows/
+!.agents/workflows/**
+!.agents/AGENTS.md
+!.agents/rules/
+!.agents/rules/**
+
 

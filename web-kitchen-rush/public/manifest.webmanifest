@@ -1,0 +1,22 @@
+{
+  "name": "Kitchen Rush — Restaurant Stories",
+  "short_name": "Kitchen Rush",
+  "description": "Build a little restaurant with a big heart. Design your sunset rooftop, hire an animal team, craft the menu and grow your own restaurant business.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#224F4A",
+  "theme_color": "#224F4A",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png"
+    }
+  ]
+}
