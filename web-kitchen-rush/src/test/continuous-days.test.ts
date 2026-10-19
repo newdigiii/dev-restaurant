@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { RestaurantEngine } from '@/management/engine';
+import { MAX_OFFLINE_SECONDS, RestaurantEngine } from '@/management/engine';
 import { SAVE_KEY, createRestaurant, restaurantSchema } from '@/management/types';
 
 function harness() {
@@ -78,6 +78,12 @@ describe('continuous local restaurant', () => {
     const h = harness(), e = new RestaurantEngine(h.storage, h.now); e.open(); e.suspend(); h.advance(8 * 3600); await e.resume();
     expect(e.state.clock).toBeCloseTo(8 * 3600); expect(e.state.day).toBeGreaterThan(100); expect(e.state.history).toHaveLength(20);
     expect(restaurantSchema.safeParse(h.read()).success).toBe(true); expect(e.state.history[19].day).toBe(e.state.day - 1); expect(e.incomeReceipts).toEqual([]);
+  });
+  it('caps multi-day offline absence at MAX_OFFLINE_SECONDS to prevent main-thread freeze and updates lastActiveAt', async () => {
+    const h = harness(), e = new RestaurantEngine(h.storage, h.now); e.open(); e.suspend(); h.advance(30 * 24 * 3600); await e.resume();
+    expect(e.state.clock).toBeCloseTo(MAX_OFFLINE_SECONDS); expect(h.read().lastActiveAt).toBe(h.now());
+    const reloaded = new RestaurantEngine(h.storage, h.now); await reloaded.resume();
+    expect(reloaded.awaySummary).toBeNull(); expect(reloaded.state.clock).toBeCloseTo(MAX_OFFLINE_SECONDS);
   });
   it('checkpoints long catch-up and yields, with reset cancelling the old session', async () => {
     const h = harness(), e = new RestaurantEngine(h.storage, h.now); e.open(); e.suspend(); h.advance(10000);

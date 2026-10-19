@@ -1,4 +1,51 @@
-node_modules
+# ==========================================
+# 1. BẢO MẬT & CHỐNG BOT QUÉT (TỐI QUAN TRỌNG)
+# ==========================================
 .env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.cert
+*serviceAccountKey*.json
+*firebase*.json
+*supabase*.env
+credentials.json
+client_secret*.json
+id_rsa*
+*.keystore
+*.jks
+
+# ==========================================
+# 2. FILE BUILD & FILE DUNG LƯỢNG LỚN (> 25MB / BINARY)
+# ==========================================
+node_modules
+node_modules/
+dist/
+build/
+out/
+.next/
+.turbo/
 .expo
 .rork
+*.apk
+*.aab
+*.ipa
+*.mp4
+*.mov
+*.avi
+*.zip
+*.tar.gz
+*.7z
+*.iso
+
+# ==========================================
+# 3. AI AGENTS TEMPORARY CACHE & LOGS
+# ==========================================
+.gemini/
+.claude/
+.scratch/tmp/
+.agents/logs/
+.agents/cache/
+.agents/memory/
+

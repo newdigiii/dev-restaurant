@@ -4,6 +4,7 @@ import { CATALOG, DAY_LENGTH, DISHES, SAVE_KEY, capacity, comfort, createRestaur
 import { advanceDailyChallenges, createDailyChallenges, isSpecialGuest, challengeTitles } from './daily-challenges';
 import type { CashReceipt } from './cash-feedback';
 
+export const MAX_OFFLINE_SECONDS = 8 * 3600;
 export const GOALS = [
   { id: 'first-service', title: 'A warm welcome', text: 'Serve your first 5 guests', target: 5, reward: 180, value: (s: RestaurantState) => s.lifetimeServed },
   { id: 'atmosphere', title: 'Make it yours', text: 'Reach 50 atmosphere', target: 50, reward: 150, value: comfort },
@@ -87,14 +88,14 @@ export class RestaurantEngine {
   /** Save once when leaving; subsequent pagehide/unmount events must not move the offline checkpoint. */
   suspend(): void { if (!this.backgrounded) this.save(); this.backgrounded = true; this.accumulator = 0; }
   dismissAway(): void { this.awaySummary = null; this.notify(); }
-  /** Replay all elapsed wall time at 1× using the same fixed simulation step, yielding between chunks. */
+  /** Replay all elapsed wall time at 1× (up to MAX_OFFLINE_SECONDS) using the same fixed simulation step, yielding between chunks. */
   async resume(): Promise<void> {
     this.backgrounded = false;
     if (this.catchingUp) return;
-    const s = this.state, start = s.lastActiveAt;
+    const s = this.state, start = s.lastActiveAt, maxSteps = MAX_OFFLINE_SECONDS * 10;
     let target = this.now();
     if (!start || target <= start || this.paused || s.phase !== 'service') { this.save(); this.notify(); return; }
-    let steps = Math.floor((target - start) / 100);
+    let steps = Math.min(maxSteps, Math.floor((target - start) / 100));
     if (!steps) return;
     const before = { day: s.day, cash: s.cash, served: s.lifetimeServed, clock: s.clock, challengeBonus: s.lifetimeChallengeBonus };
     this.catchingUp = true; this.catchUpProgress = 0; this.incomeReceipts = []; this.notify();
@@ -102,7 +103,7 @@ export class RestaurantEngine {
     // Save partial checkpoints so closing the page during recovery never duplicates completed business.
     while (this.state === s && !this.paused && s.phase === 'service') {
       // Include time spent replaying/throttled in the background instead of silently discarding it.
-      target = Math.max(target, this.now()); steps = Math.floor((target - start) / 100);
+      target = Math.max(target, this.now()); steps = Math.min(maxSteps, Math.floor((target - start) / 100));
       if (done >= steps) break;
       const end = Math.min(steps, done + 1000);
       for (; done < end && s.phase === 'service' && !this.paused; done++) this.step(.1);

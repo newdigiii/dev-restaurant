@@ -10,7 +10,7 @@ import { useReducedMotionQuery } from '@/hooks/use-reduced-motion';
 import { restaurant } from './engine';
 import { CITY_CARS, CITY_WALKERS, cityDelta, cityLoop, sampleStreet } from './city-motion';
 
-const CITY_CAR: ModelAsset = { url: 'https://4t92512aiqitifoedg47w.rork.app/~assets/3d/f1c9e330-ee14-405f-85a7-2cde23bfba6c.glb', front: 'negativeX', up: 'positiveY' };
+const CITY_CAR: ModelAsset = { url: '/assets/3d/f1c9e330-ee14-405f-85a7-2cde23bfba6c.glb', front: 'negativeX', up: 'positiveY' };
 class TrafficBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
