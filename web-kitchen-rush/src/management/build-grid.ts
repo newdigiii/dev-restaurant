@@ -1,7 +1,15 @@
-import { CATALOG, CELL, HEIGHT, type Furniture } from './types';
+import { CATALOG, CELL, HEIGHT, type Furniture, type Point } from './types';
 
 /** Floor-space endpoints, in pairs for screen-width-stable grid lines. */
 export type GridVertex = [number, number, number];
+
+/** Rotate a screen-relative grid step (Up/Down/Left/Right) to match the camera's 90° angle step. */
+export function rotateStep(step: Point, angle: number): Point {
+  let { x, z } = step;
+  const turns = ((angle % 4) + 4) % 4;
+  for (let i = 0; i < turns; i++) { const nextX = z; z = -x; x = nextX; }
+  return { x: x || 0, z: z || 0 };
+}
 
 /** Lines sit just above the floor and match the simulation's cell boundaries exactly. */
 export function gridSegments(columns: number): GridVertex[] {

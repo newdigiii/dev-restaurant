@@ -49,6 +49,12 @@ it('updates coordinates, rotation and non-color validity without charging until 
   await userEvent.keyboard('{ArrowLeft}r');
   await expect.element(readout).toHaveTextContent('Col 1 · Row 8');
   await expect.element(screen.getByTestId('grid-scene')).toHaveAttribute('data-rotation', '1');
+  await screen.getByRole('button', { name: 'Rotate view' }).click();
+  await screen.getByRole('button', { name: 'Move furniture right' }).click();
+  await expect.element(readout).toHaveTextContent('Col 1 · Row 7');
+  await userEvent.keyboard('{ArrowLeft}');
+  await expect.element(readout).toHaveTextContent('Col 1 · Row 8');
+  await screen.getByRole('button', { name: 'Reset view' }).click();
   await userEvent.keyboard('rrr');
   await screen.getByRole('button', { name: 'Confirm', exact: true }).click();
   expect(restaurant.state.cash).toBe(1070);

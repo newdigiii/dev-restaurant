@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { alignmentSegments, footprintBounds, gridSegments } from '@/management/build-grid';
+import { alignmentSegments, footprintBounds, gridSegments, rotateStep } from '@/management/build-grid';
 import { accessPoints, occupied, placementError } from '@/management/layout';
 import { CATALOG, CELL, HEIGHT, createRestaurant, type Furniture, type FurnitureKind } from '@/management/types';
+import { AUDIO, MODELS } from '@/game/assets';
 
 const table: Furniture = { id: -1, kind: 'table', x: 0, z: 7, rotation: 0 };
 describe('furniture alignment grid', () => {
@@ -56,5 +57,20 @@ describe('furniture alignment grid', () => {
     expect(placementError(state, state.furniture[2])).toBeNull();
     gridSegments(10); footprintBounds(table); alignmentSegments(table, 10);
     expect(state).toEqual(before);
+  });
+  it('rotates screen-relative furniture movement steps to match camera angle (0..3)', () => {
+    const up = { x: 0, z: -1 }, right = { x: 1, z: 0 };
+    expect(rotateStep(up, 0)).toEqual({ x: 0, z: -1 });
+    expect(rotateStep(up, 1)).toEqual({ x: -1, z: 0 });
+    expect(rotateStep(up, 2)).toEqual({ x: 0, z: 1 });
+    expect(rotateStep(up, 3)).toEqual({ x: 1, z: 0 });
+    expect(rotateStep(right, 0)).toEqual({ x: 1, z: 0 });
+    expect(rotateStep(right, 1)).toEqual({ x: 0, z: -1 });
+    expect(rotateStep(right, 2)).toEqual({ x: -1, z: 0 });
+    expect(rotateStep(right, 3)).toEqual({ x: 0, z: 1 });
+  });
+  it('loads all 3D models and audio from local /assets/ paths with zero third-party hotlinks', () => {
+    for (const model of Object.values(MODELS)) expect(model.url.startsWith('/assets/3d/')).toBe(true);
+    for (const audio of Object.values(AUDIO)) expect(audio.startsWith('/assets/aud/')).toBe(true);
   });
 });
